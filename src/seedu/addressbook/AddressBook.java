@@ -486,7 +486,7 @@ public class AddressBook {
      * @return list of persons in full model with name containing some of the keywords
      */
     private static ArrayList<String[]> getPersonsWithNameContainingAnyKeyword(Collection<String> keywords) {
-        final ArrayList<String[]> matchedPersons = new ArrayList<>();
+        final Set<String[]> matchedPersons = new HashSet<>();
 
         Collection <String> lowerCaseKeywords = convertStringCollectionToLowerCase(keywords);
         for (String[] person : getAllPersonsInAddressBook()) {
@@ -498,7 +498,7 @@ public class AddressBook {
             }
         }
 
-        return matchedPersons;
+        return new ArrayList<>(matchedPersons);
     }
 
     /**
