@@ -17,7 +17,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Scanner;
@@ -88,6 +87,10 @@ public class AddressBook {
     private static final String MESSAGE_ERROR_READING_FROM_FILE = "Unexpected error: unable to read from file: %1$s";
     private static final String MESSAGE_ERROR_WRITING_TO_FILE = "Unexpected error: unable to write to file: %1$s";
     private static final String MESSAGE_PERSONS_FOUND_OVERVIEW = "%1$d persons found!";
+    private static final String MESSAGE_FOUND_NAME_MATCHES = "Name Matches";
+    private static final String MESSAGE_FOUND_PHONE_MATCHES = "Phone Number Matches";
+    private static final String MESSAGE_FOUND_EMAIL_MATCHES = "Email Matches";
+    private static final String MESSAGE_FOUND_TOTAL_HITS = "%d hits in total!";
     private static final String MESSAGE_STORAGE_FILE_CREATED = "Created new empty storage file: %1$s";
     private static final String MESSAGE_WELCOME = "Welcome to your Address Book!";
     private static final String MESSAGE_USING_DEFAULT_FILE = "Using default storage file : " + DEFAULT_STORAGE_FILEPATH;
@@ -453,9 +456,35 @@ public class AddressBook {
      */
     private static String executeFindPersons(String commandArgs) {
         final Set<String> keywords = extractKeywordsFromFindPersonArgs(commandArgs);
-        final ArrayList<String[]> personsFound = getPersonsWithNameContainingAnyKeyword(keywords);
-        showToUser(personsFound);
-        return getMessageForPersonsDisplayedSummary(personsFound);
+
+        final ArrayList<String[]> personsFoundMatchingName = getPersonsWithNameContainingAnyKeyword(keywords);
+        showToUser(MESSAGE_FOUND_NAME_MATCHES);
+        showToUser(personsFoundMatchingName);
+
+        final ArrayList<String[]> personsFoundMatchingPhone = getPersonsWithPhoneContainingAnyKeyword(keywords);
+        showToUser(MESSAGE_FOUND_PHONE_MATCHES);
+        showToUser(personsFoundMatchingPhone);
+
+        final ArrayList<String[]> personsFoundMatchingEmail = getPersonsWithEmailContainingAnyKeyword(keywords);
+        showToUser(MESSAGE_FOUND_EMAIL_MATCHES);
+        showToUser(personsFoundMatchingEmail);
+
+        return getMessageForFindResults(personsFoundMatchingName, personsFoundMatchingPhone, personsFoundMatchingEmail);
+    }
+
+    /**
+     * Constructs a feedback message to summarise the total number of search hits of the find command.
+     *
+     * @param listsOfPersons variable number of lists of lists of persons
+     * @return summary message for number of hits in find command
+     */
+    private static String getMessageForFindResults(ArrayList<String[]> ... listsOfPersons) {
+        int totalHitCount = 0;
+        for (ArrayList<String[]> persons : listsOfPersons) {
+            totalHitCount += persons.size();
+        }
+
+        return String.format(MESSAGE_FOUND_TOTAL_HITS, totalHitCount);
     }
 
     /**
@@ -491,6 +520,38 @@ public class AddressBook {
         Collection <String> lowerCaseKeywords = convertStringCollectionToLowerCase(keywords);
         for (String[] person : getAllPersonsInAddressBook()) {
             final Set<String> wordsInName = new HashSet<>(splitByWhitespace(getNameFromPerson(person)));
+            for (String lowerCaseWordInName : convertStringCollectionToLowerCase(wordsInName)) {
+                if (lowerCaseKeywords.stream().anyMatch(lowerCaseWordInName::contains)) {
+                    matchedPersons.add(person);
+                }
+            }
+        }
+
+        return new ArrayList<>(matchedPersons);
+    }
+
+    private static ArrayList<String[]> getPersonsWithPhoneContainingAnyKeyword(Collection<String> keywords) {
+        final Set<String[]> matchedPersons = new HashSet<>();
+
+        Collection<String> lowerCaseKeywords = convertStringCollectionToLowerCase(keywords);
+        for (String[] person : getAllPersonsInAddressBook()) {
+            final Set<String> wordsInName = new HashSet<>(splitByWhitespace(getPhoneFromPerson(person)));
+            for (String lowerCaseWordInName : convertStringCollectionToLowerCase(wordsInName)) {
+                if (lowerCaseKeywords.stream().anyMatch(lowerCaseWordInName::contains)) {
+                    matchedPersons.add(person);
+                }
+            }
+        }
+
+        return new ArrayList<>(matchedPersons);
+    }
+
+    private static ArrayList<String[]> getPersonsWithEmailContainingAnyKeyword(Collection<String> keywords) {
+        final Set<String[]> matchedPersons = new HashSet<>();
+
+        Collection <String> lowerCaseKeywords = convertStringCollectionToLowerCase(keywords);
+        for (String[] person : getAllPersonsInAddressBook()) {
+            final Set<String> wordsInName = new HashSet<>(splitByWhitespace(getEmailFromPerson(person)));
             for (String lowerCaseWordInName : convertStringCollectionToLowerCase(wordsInName)) {
                 if (lowerCaseKeywords.stream().anyMatch(lowerCaseWordInName::contains)) {
                     matchedPersons.add(person);
