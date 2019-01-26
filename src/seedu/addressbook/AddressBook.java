@@ -456,6 +456,9 @@ public class AddressBook {
      */
     private static String executeFindPersons(String commandArgs) {
         final Set<String> keywords = extractKeywordsFromFindPersonArgs(commandArgs);
+        if (keywords.size() == 0) {
+            return getMessageForFindResults();
+        }
 
         final ArrayList<String[]> personsFoundMatchingName = getPersonsWithNameContainingAnyKeyword(keywords);
         showToUser(MESSAGE_FOUND_NAME_MATCHES);
@@ -498,12 +501,17 @@ public class AddressBook {
     }
 
     /**
-     * Extracts keywords from the command arguments given for the find persons command.
+     * Extracts keywords from the command arguments given for the find persons command. Returns
+     * empty HashSet if no keywords.
      *
      * @param findPersonCommandArgs full command args string for the find persons command
      * @return set of keywords as specified by args
      */
     private static Set<String> extractKeywordsFromFindPersonArgs(String findPersonCommandArgs) {
+        if (findPersonCommandArgs.isEmpty()) {
+            return new HashSet<>();
+        }
+
         return new HashSet<>(splitByWhitespace(findPersonCommandArgs.trim()));
     }
 
