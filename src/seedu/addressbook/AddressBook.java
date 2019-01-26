@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /*
  * NOTE : =============================================================
@@ -443,8 +444,9 @@ public class AddressBook {
     }
 
     /**
-     * Finds and lists all persons in address book whose name contains any of the argument keywords.
-     * Keyword matching is case sensitive.
+     * Finds and lists all persons in address book whose name contains any of the argument keywords,
+     * in part or whole.
+     * Keyword matching is not case sensitive.
      *
      * @param commandArgs full command args string from the user
      * @return feedback display message for the operation result
@@ -477,20 +479,36 @@ public class AddressBook {
     }
 
     /**
-     * Retrieves all persons in the full model whose names contain some of the specified keywords.
+     * Retrieves all persons in the full model whose names contain some of the specified keywords,
+     * in part or whole.
      *
      * @param keywords for searching
      * @return list of persons in full model with name containing some of the keywords
      */
     private static ArrayList<String[]> getPersonsWithNameContainingAnyKeyword(Collection<String> keywords) {
         final ArrayList<String[]> matchedPersons = new ArrayList<>();
+
+        Collection <String> lowerCaseKeywords = convertStringCollectionToLowerCase(keywords);
         for (String[] person : getAllPersonsInAddressBook()) {
             final Set<String> wordsInName = new HashSet<>(splitByWhitespace(getNameFromPerson(person)));
-            if (!Collections.disjoint(wordsInName, keywords)) {
-                matchedPersons.add(person);
+            for (String lowerCaseWordInName : convertStringCollectionToLowerCase(wordsInName)) {
+                if (lowerCaseKeywords.stream().anyMatch(lowerCaseWordInName::contains)) {
+                    matchedPersons.add(person);
+                }
             }
         }
+
         return matchedPersons;
+    }
+
+    /**
+     * Converts all Strings in a collection to lowercase.
+     *
+     * @param stringCollection to convert
+     * @return collection of lowercase strings
+     */
+    private static Collection<String> convertStringCollectionToLowerCase(Collection<String> stringCollection) {
+        return stringCollection.stream().map(String::toLowerCase).collect(Collectors.toSet());
     }
 
     /**
