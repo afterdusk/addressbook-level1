@@ -221,7 +221,7 @@
 || Phone Number Matches
 || 
 || Email Matches
-|| 	1. Dickson Ee  Phone Number: 444444  Email: dickson@nus.edu.sg
+|| 	3. Dickson Ee  Phone Number: 444444  Email: dickson@nus.edu.sg
 || 
 || 3 hits in total!
 || ===================================================
@@ -233,7 +233,7 @@
 || Phone Number Matches
 || 
 || Email Matches
-|| 	1. Charlie Dickson  Phone Number: 333333  Email: charlie.d@nus.edu.sg
+|| 	3. Charlie Dickson  Phone Number: 333333  Email: charlie.d@nus.edu.sg
 || 
 || 3 hits in total!
 || ===================================================
@@ -266,10 +266,10 @@
 || 
 || ===================================================
 || Enter command: || [Command entered:  delete 3]
-|| The person index provided is invalid
+|| Deleted Person: Charlie Dickson  Phone Number: 333333  Email: charlie.d@nus.edu.sg
 || ===================================================
 || Enter command: || [Command entered:  delete 2]
-|| Deleted Person: Charlie Dickson  Phone Number: 333333  Email: charlie.d@nus.edu.sg
+|| Person could not be found in address book
 || ===================================================
 || Enter command: || [Command entered:  delete 2]
 || Person could not be found in address book
