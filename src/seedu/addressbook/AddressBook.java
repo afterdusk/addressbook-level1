@@ -10,6 +10,7 @@ package seedu.addressbook;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -457,37 +458,35 @@ public class AddressBook {
     private static String executeFindPersons(String commandArgs) {
         final Set<String> keywords = extractKeywordsFromFindPersonArgs(commandArgs);
         if (keywords.size() == 0) {
-            return getMessageForFindResults();
+            return getMessageForFindResults(new ArrayList<>());
         }
 
         final ArrayList<String[]> personsFoundMatchingName = getPersonsWithNameContainingAnyKeyword(keywords);
         showToUser(MESSAGE_FOUND_NAME_MATCHES);
         showToUser(personsFoundMatchingName);
+        final ArrayList<String[]> personsFoundMatching = new ArrayList<>(personsFoundMatchingName);
 
         final ArrayList<String[]> personsFoundMatchingPhone = getPersonsWithPhoneContainingAnyKeyword(keywords);
         showToUser(MESSAGE_FOUND_PHONE_MATCHES);
-        showToUser(personsFoundMatchingPhone);
+        showToUser(personsFoundMatching, personsFoundMatchingPhone);
+        personsFoundMatching.addAll(personsFoundMatchingPhone);
 
         final ArrayList<String[]> personsFoundMatchingEmail = getPersonsWithEmailContainingAnyKeyword(keywords);
         showToUser(MESSAGE_FOUND_EMAIL_MATCHES);
-        showToUser(personsFoundMatchingEmail);
+        showToUser(personsFoundMatching, personsFoundMatchingEmail);
+        personsFoundMatching.addAll(personsFoundMatchingEmail);
 
-        return getMessageForFindResults(personsFoundMatchingName, personsFoundMatchingPhone, personsFoundMatchingEmail);
+        return getMessageForFindResults(personsFoundMatching);
     }
 
     /**
      * Constructs a feedback message to summarise the total number of search hits of the find command.
      *
-     * @param listsOfPersons variable number of lists of lists of persons
+     * @param personsFoundMatching contains the list of people found
      * @return summary message for number of hits in find command
      */
-    private static String getMessageForFindResults(ArrayList<String[]> ... listsOfPersons) {
-        int totalHitCount = 0;
-        for (ArrayList<String[]> persons : listsOfPersons) {
-            totalHitCount += persons.size();
-        }
-
-        return String.format(MESSAGE_FOUND_TOTAL_HITS, totalHitCount);
+    private static String getMessageForFindResults(ArrayList<String[]> personsFoundMatching) {
+        return String.format(MESSAGE_FOUND_TOTAL_HITS, personsFoundMatching.size());
     }
 
     /**
@@ -723,6 +722,20 @@ public class AddressBook {
     }
 
     /**
+     * Shows the list of persons in newPersons to the user in a find operation.
+     *
+     * @param existingPersons The current persons already displayed in the find operation
+     * @param newPersons The persons to be displayed
+     */
+    private static void showToUser(ArrayList<String[]> existingPersons, ArrayList<String[]> newPersons) {
+        String listAsString = getDisplayString(existingPersons, newPersons);
+        showToUser(listAsString);
+        ArrayList<String[]> newViewedPersons = new ArrayList<>(existingPersons);
+        newViewedPersons.addAll(newPersons);
+        updateLatestViewedPersonListing(newViewedPersons);
+    }
+
+    /**
      * Returns the display string representation of the list of persons.
      */
     private static String getDisplayString(ArrayList<String[]> persons) {
@@ -733,6 +746,18 @@ public class AddressBook {
             messageAccumulator.append('\t')
                               .append(getIndexedPersonListElementMessage(displayIndex, person))
                               .append(LS);
+        }
+        return messageAccumulator.toString();
+    }
+
+    private static String getDisplayString(ArrayList<String[]> existingPersons, ArrayList<String[]> newPersons) {
+        final StringBuilder messageAccumulator = new StringBuilder();
+        for (int i = 0; i < newPersons.size(); i++) {
+            final String[] person = newPersons.get(i);
+            final int displayIndex = i + existingPersons.size() + DISPLAYED_INDEX_OFFSET;
+            messageAccumulator.append('\t')
+                    .append(getIndexedPersonListElementMessage(displayIndex, person))
+                    .append(LS);
         }
         return messageAccumulator.toString();
     }
